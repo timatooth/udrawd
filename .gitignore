@@ -1,0 +1,8 @@
+static/
+nbproject/private
+*~
+*.key
+*.crt
+*.o
+udrawd
+.DS_Store
