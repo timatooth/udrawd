@@ -2,6 +2,7 @@
 <configurationDescriptor version="97">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="." name="0">
+      <in>README.md</in>
       <in>udrawd.cpp</in>
     </df>
     <logicalFolder name="ExternalFiles"
@@ -24,9 +25,6 @@
         <dependencyChecking>false</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
-      <flagsDictionary>
-        <element flagsID="0" commonFlags="-std=gnu++11"/>
-      </flagsDictionary>
       <codeAssistance>
       </codeAssistance>
       <makefileType>
@@ -35,15 +33,60 @@
           <buildCommand>${MAKE} -f Makefile</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
           <executablePath>udrawd</executablePath>
+          <ccTool>
+            <incDir>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/config</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/system</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/core</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/asio</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/asio/ssl</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/asio/detail</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/asio/ssl/detail</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/asio/ssl/detail/impl</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/date_time</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/date_time/posix_time</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/date_time/gregorian</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/asio/impl</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/asio/ssl/impl</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/function</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/detail</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/range</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/range/detail</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/iterator</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/mpl/aux_</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/mpl</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/mpl/aux_/preprocessed/gcc</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/type_traits</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/algorithm/string</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/algorithm/string/detail</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/regex/v4</pElem>
+              <pElem>/usr/local/Cellar/hiredis/0.13.3/include/hiredis</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/type_traits/detail</pElem>
+              <pElem>/usr/local/opt/openssl/include/openssl</pElem>
+              <pElem>/usr/local/Cellar/nghttp2/1.4.0/include/nghttp2</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/exception</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/move</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/move/detail</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/iterator/detail</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/asio/detail/impl</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include/boost/range/algorithm</pElem>
+              <pElem>/usr/local/Cellar/hiredis/0.13.3/include</pElem>
+              <pElem>/usr/local/Cellar/nghttp2/1.4.0/include</pElem>
+              <pElem>/usr/local/Cellar/boost/1.58.0/include</pElem>
+              <pElem>/usr/local/opt/openssl/include</pElem>
+              <pElem>.</pElem>
+            </incDir>
+          </ccTool>
         </makeTool>
         <preBuild>
           <preBuildCommandWorkingDir>.</preBuildCommandWorkingDir>
           <preBuildCommand></preBuildCommand>
         </preBuild>
       </makefileType>
+      <item path="README.md" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="udrawd.cpp" ex="false" tool="1" flavor2="8">
-        <ccTool flags="0">
-        </ccTool>
       </item>
     </conf>
   </confs>

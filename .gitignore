@@ -6,3 +6,5 @@ nbproject/private
 *.o
 udrawd
 .DS_Store
+*.pem
+/dist/

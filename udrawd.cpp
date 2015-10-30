@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
             redisReply *reply;
             //redis STFU compiler warnings
             std::string query = "GET " + key;
-            reply = redisCommand(c, query.c_str());
+            reply = (redisReply*) redisCommand(c, query.c_str());
 
             header_map hm;
             header_value value;
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
             res.end(response);
             freeReplyObject(reply);
         } else if (req.method() == "PUT") {
-            //broken
+            //todo :)
             res.write_head(503); //unavailable
             res.end();
         }
@@ -67,10 +67,6 @@ int main(int argc, char *argv[]) {
     });
     
     server.handle("/socket.io/", [](const request &req, const response & res) {
-        //boost::system::error_code ec;
-        //auto push = res.push(ec, "GET", "/socket.io/");
-        //push->write_head(404);
-        //push->end("nope");
         auto header = header_map();
         header.emplace("location", header_value{"https://udraw.me" + req.uri().path +"?"+ req.uri().raw_query });
         res.write_head(301, header);
