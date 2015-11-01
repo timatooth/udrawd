@@ -8,6 +8,7 @@
 #endif // HAVE_FCNTL_H
 #include <iostream>
 #include <string>
+#include <fstream> //for testing
 
 #include <hiredis/hiredis.h>
 #include <nghttp2/asio_http2_server.h>
@@ -44,24 +45,69 @@ int main(int argc, char *argv[]) {
         //danger zone
         std::string key = strs[2] + ":" + strs[3] + ":" + strs[4] + ":" + strs[5];
         
+        std::vector<uint8_t> *incoming = new std::vector<uint8_t>;
+        
         if(req.method() == "GET"){
             redisReply *reply;
-            //redis STFU compiler warnings
             std::string query = "GET " + key;
             reply = (redisReply*) redisCommand(c, query.c_str());
+            auto headers = header_map();
 
-            header_map hm;
-            header_value value;
-            value.value = "image/png";
-            hm.insert(std::make_pair("content-type", value));
-            res.write_head(200, hm);        
-            std::string response(reply->str, reply->len);
-            res.end(response);
-            freeReplyObject(reply);
+            if(reply->type == REDIS_REPLY_NIL){
+                //no tile here yet send a 204 if tile is available for creation by users
+                res.write_head(204);
+                res.end();
+            } else if(reply->type == REDIS_REPLY_STRING){
+                //we're good to go with sending the tile data
+                headers.emplace("content-length", header_value {std::to_string(reply->len)});
+                headers.emplace("content-type", header_value {"image/png"});
+                //prepare the tile data as a string of bytes
+                std::string response(reply->str, reply->len);
+                res.write_head(200, headers);
+                res.end(response);
+                
+            } else {
+                std::cerr << "got a bad hiredis reply type #: " << reply->type << std::endl;
+            }
+            freeReplyObject(reply); //clean up redis response
+
         } else if (req.method() == "PUT") {
             //todo :)
-            res.write_head(503); //unavailable
-            res.end();
+            req.on_data([incoming, &res](const uint8_t *data, std::size_t len){
+                auto headers = header_map();
+                std::cout << "got data of size: " << len << std::endl;
+                
+                if(len > 0){
+                    //the noob way
+                    for(int i = 0; i < len; i++){
+                        incoming->push_back(data[i]);
+                    }
+                } else if(len == 0){
+                    std::cout << "buffer done with total: " << incoming->size() << std::endl;
+                    
+                    //spit result back
+                    headers.emplace("content-length", header_value {std::to_string(incoming->size())});
+                    headers.emplace("content-type", header_value {"image/png"});
+                    res.write_head(200, headers);
+                    std::string stringres(incoming->begin(), incoming->end());
+                    
+                    //debugging
+                    std::ofstream file("lastput.bin.png", std::ios::binary);
+                    //file.write(reinterpret_cast<const char*>(incoming), incoming->size());
+                    file.write(reinterpret_cast<const char*>(incoming), incoming->size());
+                    file.close();
+                    //
+                    
+                    res.end(stringres);
+                    
+                    //todo free vector memory!!!
+                    delete incoming;
+                }
+                
+                
+            });
+            //res.write_head(503); //unavailable
+            //res.end();
         }
         
     });
@@ -74,25 +120,27 @@ int main(int argc, char *argv[]) {
     });
     
     
-    server.handle("/", [](const request &req, const response & res) {
+    server.handle("/", [&docroot](const request &req, const response & res) {
         /*boost::system::error_code ec;
         auto push = res.push(ec, "GET", "/socket.io/");
         push->write_head(404);
         push->end("nope");*/
         
         res.write_head(200);
-        res.end(file_generator("index.html"));
+        std::cout << "serving: " << docroot << "/index.html" << std::endl;
+        res.end(file_generator(docroot + "/index.html"));
     });
     
     server.handle("/static/", [&docroot](const request &req, const response & res) {
         auto path = percent_decode(req.uri().path);
         if (!check_path(path)) {
-          res.write_head(404);
+          res.write_head(400);
           res.end();
           return;
         }
-        std::cout << "opening " << path << std::endl;
+       
         path = docroot + path;
+        //std::cout << "opening " << path << std::endl;
         auto fd = open(path.c_str(), O_RDONLY);
         if (fd == -1) {
           res.write_head(404);
@@ -112,7 +160,9 @@ int main(int argc, char *argv[]) {
         res.end(file_generator_from_fd(fd));
         
     });
-
+    
+    std::cerr << "Listening on 0.0.0.0:3000" << std::endl;
+    
     if (server.listen_and_serve(ec, tls, "0.0.0.0", "3000")) {
         std::cerr << "error: " << ec.message() << std::endl;
     }
