@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
             freeReplyObject(reply); //clean up redis response
 
         } else if (req.method() == "PUT") {
-            //todo :)
+            //todo redo c++ sucks. swith to memcpy :)
             req.on_data([incoming, &res](const uint8_t *data, std::size_t len){
                 auto headers = header_map();
                 std::cout << "got data of size: " << len << std::endl;
@@ -100,7 +100,6 @@ int main(int argc, char *argv[]) {
                     
                     res.end(stringres);
                     
-                    //todo free vector memory!!!
                     delete incoming;
                 }
                 
