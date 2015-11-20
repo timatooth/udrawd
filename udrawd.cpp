@@ -8,7 +8,6 @@
 #endif // HAVE_FCNTL_H
 #include <iostream>
 #include <string>
-#include <fstream> //for testing
 
 #include <hiredis/hiredis.h>
 #include <nghttp2/asio_http2_server.h>
@@ -37,6 +36,7 @@ int main(int argc, char *argv[]) {
     redisContext *c;
     struct timeval timeout = {1, 500000}; // 1.5 seconds
     c = redisConnectWithTimeout("127.0.0.1", 6379, timeout);
+    
 
     server.handle("/canvases/main/", [c](const request &req, const response & res) {
         //unsafe split, todo redo
@@ -45,11 +45,10 @@ int main(int argc, char *argv[]) {
         //danger zone
         std::string key = strs[2] + ":" + strs[3] + ":" + strs[4] + ":" + strs[5];
         
-        std::vector<uint8_t> *incoming = new std::vector<uint8_t>;
         
         if(req.method() == "GET"){
             redisReply *reply;
-            std::string query = "GET " + key;
+            std::string query = "HGET tile:" + key + " data";
             reply = (redisReply*) redisCommand(c, query.c_str());
             auto headers = header_map();
 
@@ -67,46 +66,51 @@ int main(int argc, char *argv[]) {
                 res.end(response);
                 
             } else {
+                res.write_head(500);
+                res.end();
                 std::cerr << "got a bad hiredis reply type #: " << reply->type << std::endl;
             }
             freeReplyObject(reply); //clean up redis response
 
         } else if (req.method() == "PUT") {
-            //todo redo c++ sucks. swith to memcpy :)
-            req.on_data([incoming, &res](const uint8_t *data, std::size_t len){
-                auto headers = header_map();
-                std::cout << "got data of size: " << len << std::endl;
+            uint8_t *dataBox = (uint8_t*) malloc(300 * 1000); //300K buffer
+            std::shared_ptr<size_t> offset (new size_t(0)); //hold buffer size/position
+            
+            req.on_data([dataBox, offset, key, c, &res](const uint8_t *data, std::size_t len) {
+                //std::cout << "got data of size: " << len << std::endl;
+                //std::cout << "offset is:  " << *offset.get() << std::endl;
                 
                 if(len > 0){
-                    //the noob way
-                    for(int i = 0; i < len; i++){
-                        incoming->push_back(data[i]);
+                    if(*offset.get() + len > 300 * 1000 - 1){
+                        res.write_head(413); //request too large
+                        res.end();
+                        free(dataBox);
+                        return;
                     }
+                    
+                    //copy the incoming data into buffer at offset levels
+                    memcpy(dataBox + *offset.get(), data, len);
+                    *offset.get() += len;
                 } else if(len == 0){
-                    std::cout << "buffer done with total: " << incoming->size() << std::endl;
+                    //write into redis
+
+                    redisReply *insertTile = (redisReply*) redisCommand(c, "HSET tile:%s data %b", key.c_str(), dataBox, *offset.get());
+                    if(insertTile->type == REDIS_REPLY_INTEGER){
+                        //successfully saved
+                        res.write_head(201);
+                        res.end();
+                    } else {
+                        res.write_head(500);
+                        res.end();
+                        std::cerr << "Unexpected save reply status is #" << insertTile->type << std::endl;
+                    }
                     
-                    //spit result back
-                    headers.emplace("content-length", header_value {std::to_string(incoming->size())});
-                    headers.emplace("content-type", header_value {"image/png"});
-                    res.write_head(200, headers);
-                    std::string stringres(incoming->begin(), incoming->end());
+                    //cleanup time
+                    freeReplyObject(insertTile);
+                    free(dataBox);
                     
-                    //debugging
-                    std::ofstream file("lastput.bin.png", std::ios::binary);
-                    //file.write(reinterpret_cast<const char*>(incoming), incoming->size());
-                    file.write(reinterpret_cast<const char*>(incoming), incoming->size());
-                    file.close();
-                    //
-                    
-                    res.end(stringres);
-                    
-                    delete incoming;
                 }
-                
-                
             });
-            //res.write_head(503); //unavailable
-            //res.end();
         }
         
     });
@@ -120,14 +124,9 @@ int main(int argc, char *argv[]) {
     
     
     server.handle("/", [&docroot](const request &req, const response & res) {
-        /*boost::system::error_code ec;
-        auto push = res.push(ec, "GET", "/socket.io/");
-        push->write_head(404);
-        push->end("nope");*/
-        
         res.write_head(200);
-        std::cout << "serving: " << docroot << "/index.html" << std::endl;
-        res.end(file_generator(docroot + "/index.html"));
+        std::cout << "serving: " << docroot << "/static/index.html" << std::endl;
+        res.end(file_generator(docroot + "/static/index.html"));
     });
     
     server.handle("/static/", [&docroot](const request &req, const response & res) {
