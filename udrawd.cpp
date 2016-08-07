@@ -110,29 +110,19 @@ int main(int argc, char *argv[]) {
             });
         }
     });
-    
-    server.handle("/socket.io/", [](const request &req, const response & res) {
-        auto header = header_map();
-        header.emplace("location", header_value{"https://udraw.me" + req.uri().path +"?"+ req.uri().raw_query });
-        res.write_head(301, header);
-        res.end();
-    });
 
     server.handle("/", [&docroot](const request &req, const response & res) {
-        res.write_head(200);
-        std::cout << "serving: " << docroot << "/static/index.html" << std::endl;
-        res.end(file_generator(docroot + "/static/index.html"));
-    });
+        auto path = percent_decode(req.uri().path); //is const char*
 
-    server.handle("/static/", [&docroot](const request &req, const response & res) {
-        auto path = percent_decode(req.uri().path);
         if (!check_path(path)) {
+            std::cout << "bad path" << std::endl;
           res.write_head(400);
           res.end();
           return;
         }
 
         path = docroot + path;
+        std::cout << "serving " << path << std::endl;
         auto fd = open(path.c_str(), O_RDONLY);
         if (fd == -1) {
           res.write_head(404);
@@ -153,9 +143,9 @@ int main(int argc, char *argv[]) {
 
     });
 
-    std::cerr << "Listening on 0.0.0.0:3000" << std::endl;
+    std::cout << "Listening on 0.0.0.0:4000" << std::endl;
 
-    if (server.listen_and_serve(ec, tls, "0.0.0.0", "3000")) {
+    if (server.listen_and_serve(ec, tls, "0.0.0.0", "4000")) {
         std::cerr << "error: " << ec.message() << std::endl;
     }
 }
