@@ -1,0 +1,2 @@
+#define udrawd_VERSION_MAJOR @udrawd_VERSION_MAJOR@
+#define udrawd_VERSION_MINOR @udrawd_VERSION_MINOR@

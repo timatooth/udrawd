@@ -13,6 +13,8 @@
 #include <nghttp2/asio_http2_server.h>
 #include <boost/algorithm/string.hpp>
 
+#include "MathFunctions/MathFunctions.h"
+
 using namespace nghttp2::asio_http2;
 using namespace nghttp2::asio_http2::server;
 
@@ -20,6 +22,7 @@ int main(int argc, char *argv[]) {
     boost::asio::ssl::context tls(boost::asio::ssl::context::sslv23);
     boost::system::error_code ec;
     std::string docroot;
+    std::cout << mysqrt(4) << std::endl;
 
     if(argc > 3){
         tls.use_private_key_file(argv[1], boost::asio::ssl::context::pem);
@@ -76,9 +79,9 @@ int main(int argc, char *argv[]) {
         } else if (req.method() == "PUT") {
             uint8_t *dataBox = (uint8_t*) malloc(300 * 1000); //300K buffer
             std::shared_ptr<size_t> offset (new size_t(0)); //hold buffer size/position
-            
+
             req.on_data([dataBox, offset, key, c, &res](const uint8_t *data, std::size_t len) {
-                
+
                 if(len > 0){
                     if(*offset.get() + len > 300 * 1000 - 1){
                         res.write_head(413); //request too large
@@ -86,7 +89,7 @@ int main(int argc, char *argv[]) {
                         free(dataBox);
                         return;
                     }
-                    
+
                     //copy the incoming data into buffer at offset levels
                     memcpy(dataBox + *offset.get(), data, len);
                     *offset.get() += len;
@@ -149,4 +152,3 @@ int main(int argc, char *argv[]) {
         std::cerr << "error: " << ec.message() << std::endl;
     }
 }
-

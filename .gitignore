@@ -10,3 +10,12 @@ udrawd
 .DS_Store
 *.pem
 /dist/
+CMakeCache.txt
+**/CMakeFiles
+CMakeFiles
+cmake_install.cmake
+udrawdConfig.h
+Makefile
+*.so
+*.a
+*.la
