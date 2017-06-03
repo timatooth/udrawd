@@ -18,6 +18,8 @@ configure_file (
   "${PROJECT_BINARY_DIR}/udrawdConfig.h"
   )
 
+include_directories(/usr/local/include)
+
 # Mac Homebrew OpenSSL workarounds
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl")
@@ -54,6 +56,9 @@ MESSAGE( STATUS "LIBUV_LIBRARIES:         " ${LIBUV_LIBRARIES} )
 add_executable(udrawd
   "src/udrawd.cpp"
   "src/canvasapi.cpp"
+)
+
+add_executable(udrawdws
   "src/websocket.cpp"
 )
 
@@ -62,6 +67,14 @@ target_link_libraries (udrawd
   ${Boost_LIBRARIES}
   ${HIREDIS_LIBRARIES}
   ${NGHTTP2_LIBRARIES}
+  ${OPENSSL_LIBRARIES}
+  ${ZLIB_LIBRARIES}
+  ${LIBUV_LIBRARIES}
+)
+
+target_link_libraries (udrawdws
+  MathFunctions
+  ${HIREDIS_LIBRARIES}
   ${OPENSSL_LIBRARIES}
   ${UWEBSOCKETS_LIBRARIES}
   ${ZLIB_LIBRARIES}

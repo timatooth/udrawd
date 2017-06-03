@@ -19,3 +19,8 @@ Makefile
 *.so
 *.a
 *.la
+*.xcodeproj/
+*.build/
+CMakeScripts/
+Debug/
+Release/
