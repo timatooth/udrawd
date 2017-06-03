@@ -13,23 +13,18 @@
 #include <nghttp2/asio_http2_server.h>
 #include <boost/algorithm/string.hpp>
 
-#include "MathFunctions/MathFunctions.h"
-
 using namespace nghttp2::asio_http2;
 using namespace nghttp2::asio_http2::server;
 
 int main(int argc, char *argv[]) {
     boost::asio::ssl::context tls(boost::asio::ssl::context::sslv23);
     boost::system::error_code ec;
-    std::string docroot;
-    std::cout << mysqrt(4) << std::endl;
 
-    if(argc > 3){
+    if(argc > 2){
         tls.use_private_key_file(argv[1], boost::asio::ssl::context::pem);
         tls.use_certificate_chain_file(argv[2]);
-        docroot = argv[3];
     } else {
-        std::cerr << "Usage: udrawd <serverkey.pem> <servercert.pem> <docroot>" << std::endl;
+        std::cerr << "Usage: udrawd <serverkey.pem> <servercert.pem>" << std::endl;
         return -1;
     }
 
@@ -112,38 +107,6 @@ int main(int argc, char *argv[]) {
                 }
             });
         }
-    });
-
-    server.handle("/", [&docroot](const request &req, const response & res) {
-        auto path = percent_decode(req.uri().path); //is const char*
-
-        if (!check_path(path)) {
-            std::cout << "bad path" << std::endl;
-          res.write_head(400);
-          res.end();
-          return;
-        }
-
-        path = docroot + path;
-        std::cout << "serving " << path << std::endl;
-        auto fd = open(path.c_str(), O_RDONLY);
-        if (fd == -1) {
-          res.write_head(404);
-          res.end();
-          return;
-        }
-
-        auto header = header_map();
-        struct stat stbuf;
-        if (stat(path.c_str(), &stbuf) == 0) {
-            header.emplace("content-length",
-                           header_value{std::to_string(stbuf.st_size)});
-            header.emplace("last-modified",
-                           header_value{http_date(stbuf.st_mtime)});
-        }
-        res.write_head(200, std::move(header));
-        res.end(file_generator_from_fd(fd));
-
     });
 
     std::cout << "Listening on 0.0.0.0:4000" << std::endl;

@@ -31,6 +31,7 @@ find_package(openssl REQUIRED)
 find_package(Boost 1.54.0 REQUIRED COMPONENTS system thread)
 find_package(hiredis REQUIRED)
 find_package(nghttp2 REQUIRED)
+find_package(uwebsockets REQUIRED)
 
 # cmake tutorial Math library
 include_directories ("${PROJECT_SOURCE_DIR}/MathFunctions")
@@ -43,6 +44,7 @@ include_directories("${PROJECT_BINARY_DIR}")
 
 MESSAGE( STATUS "Boost_LIBRARIES:         " ${Boost_LIBRARIES} )
 MESSAGE( STATUS "NGHTTP2_LIBRARIES:       " ${NGHTTP2_LIBRARIES} )
+MESSAGE( STATUS "UWEBSOCKETS_LIBRARIES:   " ${UWEBSOCKETS_LIBRARIES} )
 
 add_executable(udrawd "src/udrawd.cpp")
-target_link_libraries (udrawd MathFunctions ${Boost_LIBRARIES} ${HIREDIS_LIBRARIES} ${NGHTTP2_LIBRARIES} ${OPENSSL_LIBRARIES})
+target_link_libraries (udrawd MathFunctions ${Boost_LIBRARIES} ${HIREDIS_LIBRARIES} ${NGHTTP2_LIBRARIES} ${OPENSSL_LIBRARIES} ${UWEBSOCKETS_LIBRARIES})
