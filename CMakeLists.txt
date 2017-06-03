@@ -5,8 +5,9 @@ project (udrawd)
 SET (CMAKE_CXX_STANDARD 11)
 
 # The version number.
-set (udrawd_VERSION_MAJOR 1)
-set (udrawd_VERSION_MINOR 0)
+set (udrawd_VERSION_MAJOR 0)
+set (udrawd_VERSION_MINOR 1)
+set (udrawd_VERSION_PATCH 0)
 
 add_subdirectory (src)
 MESSAGE( STATUS "CMAKE_MODULE_PATH:         " ${CMAKE_MODULE_PATH} )
@@ -32,6 +33,8 @@ find_package(Boost 1.54.0 REQUIRED COMPONENTS system thread)
 find_package(hiredis REQUIRED)
 find_package(nghttp2 REQUIRED)
 find_package(uwebsockets REQUIRED)
+find_package(zlib REQUIRED)
+find_package(libuv REQUIRED)
 
 # cmake tutorial Math library
 include_directories ("${PROJECT_SOURCE_DIR}/MathFunctions")
@@ -45,6 +48,22 @@ include_directories("${PROJECT_BINARY_DIR}")
 MESSAGE( STATUS "Boost_LIBRARIES:         " ${Boost_LIBRARIES} )
 MESSAGE( STATUS "NGHTTP2_LIBRARIES:       " ${NGHTTP2_LIBRARIES} )
 MESSAGE( STATUS "UWEBSOCKETS_LIBRARIES:   " ${UWEBSOCKETS_LIBRARIES} )
+MESSAGE( STATUS "ZLIB_LIBRARIES:          " ${ZLIB_LIBRARIES} )
+MESSAGE( STATUS "LIBUV_LIBRARIES:         " ${LIBUV_LIBRARIES} )
 
-add_executable(udrawd "src/udrawd.cpp")
-target_link_libraries (udrawd MathFunctions ${Boost_LIBRARIES} ${HIREDIS_LIBRARIES} ${NGHTTP2_LIBRARIES} ${OPENSSL_LIBRARIES} ${UWEBSOCKETS_LIBRARIES})
+add_executable(udrawd
+  "src/udrawd.cpp"
+  "src/canvasapi.cpp"
+  "src/websocket.cpp"
+)
+
+target_link_libraries (udrawd
+  MathFunctions
+  ${Boost_LIBRARIES}
+  ${HIREDIS_LIBRARIES}
+  ${NGHTTP2_LIBRARIES}
+  ${OPENSSL_LIBRARIES}
+  ${UWEBSOCKETS_LIBRARIES}
+  ${ZLIB_LIBRARIES}
+  ${LIBUV_LIBRARIES}
+)
